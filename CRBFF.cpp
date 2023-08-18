@@ -7,8 +7,8 @@
 #include<math.h>
 #define max 10000
 struct machine {
-	int id,c,r,b,rank,loc;
-	float pow_eff,l,h,cu,ru,bu,a,v,p_min,p_max;
+	int id,c,r,b;
+	float pow_eff,l,h,cu,ru,a,v,p_min,p_max;
 };
 struct machine vm[max],pm[max];
 struct timeval start, end;
@@ -69,17 +69,14 @@ main()
 //////////////////////////////  First Fit  //////////////////////////////
 void FF(struct machine pm[],struct machine vm[],int npm,int nvm)
 {
-	int max_unaloc_vm=0, min_unaloc_vm=10000, sum_unaloc_vm=0; // number of unallocated vms
-	int max_ac_pm=0, min_ac_pm=10000, sum_ac_pm=0;  //number of active pms
-	float max_cu=0.0, min_cu=1.0, tot_cu=0.0;  //total cpu utilization
-	float max_ru=0.0, min_ru=1.0, tot_ru=0.0;  //total ram utilization
+	int max_ac_pm=0, min_ac_pm=10000, sum_ac_pm=0;  //total active pms
 	float max_rw=0.0, min_rw=1000.0, tot_rw=0.0;  //total rw
 	float max_pc=0.0, min_pc=1000000.0, tot_pc=0.0;  //total pc
 	float tmp_time=0;
 	
 	for (r=1; r<=nrun; r++) {
 		int i, j, idle=0, unaloc_vm=0, ac_pm=0;
-		float sum_cu=0, sum_ru=0, rw=0, pc=0, ave, var=0;
+		float rw=0, pc=0;
 		struct machine pm_org[npm], vm_copy[nvm];
 		machines(npm, nvm);
 		for (i=0; i<npm; i++) 
@@ -113,18 +110,11 @@ void FF(struct machine pm[],struct machine vm[],int npm,int nvm)
 		}
 		for (i=0; i<npm; i++)
 			if (pm_org[i].cu > 0) {
-				sum_cu += pm_org[i].cu;
-				sum_ru += pm_org[i].ru;
 				pc += (pm_org[i].p_min+(pm_org[i].p_max-pm_org[i].p_min)*pm_org[i].cu);
-				ave = (pm_org[i].cu + pm_org[i].ru)/2;
-				var += 0.5*((pm_org[i].cu - ave,2)+pow(pm_org[i].ru - ave,2));
 			}
-		for (i=0; i<nvm; i++) 
-			if (vm_copy[i].c != 0)
-				unaloc_vm++;
 		ac_pm = npm - idle;
 
-		// number of active pms	
+		// active pms	
 		sum_ac_pm += ac_pm;
 		if (ac_pm > max_ac_pm)
 			max_ac_pm = ac_pm;
@@ -154,17 +144,14 @@ void FF(struct machine pm[],struct machine vm[],int npm,int nvm)
 //////////////////////////////  First Fit Decreasing  //////////////////////////////
 void FFD(struct machine pm[],struct machine vm[],int npm,int nvm)
 {
-	int max_unaloc_vm=0, min_unaloc_vm=10000, sum_unaloc_vm=0; // number of unallocated vms
-	int max_ac_pm=0, min_ac_pm=10000, sum_ac_pm=0;  //number of active pms
-	float max_cu=0.0, min_cu=1.0, tot_cu=0.0;  //total cpu utilization
-	float max_ru=0.0, min_ru=1.0, tot_ru=0.0;  //total ram utilization
+	int max_ac_pm=0, min_ac_pm=10000, sum_ac_pm=0;  //total active pms
 	float max_rw=0.0, min_rw=1000.0, tot_rw=0.0;  //total rw
 	float max_pc=0.0, min_pc=1000000.0, tot_pc=0.0;  //total pc
 	float tmp_time=0;
 	
 	for (r=1; r<=nrun; r++) {
 		int i, j, idle=0, unaloc_vm=0, ac_pm=0;
-		float sum_cu=0, sum_ru=0, rw=0, pc=0, ave, var=0;
+		float sum_cu=0, sum_ru=0, rw=0, pc=0;
 		struct machine pm_org[npm], pm_copy[npm], vm_copy[nvm];
 		machines(npm, nvm);
 		for (i=0; i<npm; i++) 
@@ -200,18 +187,11 @@ void FFD(struct machine pm[],struct machine vm[],int npm,int nvm)
 		}
 		for (i=0; i<npm; i++)
 			if (pm_org[i].cu > 0) {
-				sum_cu += pm_org[i].cu;
-				sum_ru += pm_org[i].ru;
 				pc += (pm_org[i].p_min+(pm_org[i].p_max-pm_org[i].p_min)*pm_org[i].cu);
-				ave = (pm_org[i].cu + pm_org[i].ru)/2;
-				var += 0.5*((pm_org[i].cu - ave,2)+pow(pm_org[i].ru - ave,2));
 			}
-		for (i=0; i<nvm; i++) 
-			if (vm_copy[i].c != 0)
-				unaloc_vm++;
 		ac_pm = npm - idle;
 
-		// number of active pms	
+		// active pms	
 		sum_ac_pm += ac_pm;
 		if (ac_pm > max_ac_pm)
 			max_ac_pm = ac_pm;
@@ -241,17 +221,14 @@ void FFD(struct machine pm[],struct machine vm[],int npm,int nvm)
 ////////////////////////////// Best Fit //////////////////////////////
 void BF(struct machine pm[],struct machine vm[],int npm,int nvm)
 {
-	int max_unaloc_vm=0, min_unaloc_vm=10000, sum_unaloc_vm=0; // number of unallocated vms
-	int max_ac_pm=0, min_ac_pm=10000, sum_ac_pm=0;  //number of active pms
-	float max_cu=0.0, min_cu=1.0, tot_cu=0.0;  //total cpu utilization
-	float max_ru=0.0, min_ru=1.0, tot_ru=0.0;  //total ram utilization
+	int max_ac_pm=0, min_ac_pm=10000, sum_ac_pm=0;  //total active pms
 	float max_rw=0.0, min_rw=1000.0, tot_rw=0.0;  //total rw
 	float max_pc=0.0, min_pc=1000000.0, tot_pc=0.0;  //total pc
 	float tmp_time=0;
 	
 	for (r=1; r<=nrun; r++) {
 		int i, j, idle=0, unaloc_vm=0, ac_pm=0;
-		float sum_cu=0, sum_ru=0, rw=0, pc=0, ave, var=0;
+		float sum_cu=0, sum_ru=0, rw=0, pc=0;
 		struct machine pm_org[npm], pm_copy[npm], vm_copy[nvm];
 		machines(npm, nvm);
 		for (i=0; i<npm; i++) 
@@ -291,18 +268,11 @@ void BF(struct machine pm[],struct machine vm[],int npm,int nvm)
 		}
 		for (i=0; i<npm; i++)
 			if (pm_org[i].cu>0) {
-				sum_cu += pm_org[i].cu;
-				sum_ru += pm_org[i].ru;
 				pc += (pm_org[i].p_min+(pm_org[i].p_max-pm_org[i].p_min)*pm_org[i].cu);
-				ave = (pm_org[i].cu + pm_org[i].ru)/2;
-				var += 0.5*((pm_org[i].cu - ave,2)+pow(pm_org[i].ru - ave,2));
 			}
-		for (i=0; i<nvm; i++) 
-			if (vm_copy[i].c != 0)
-				unaloc_vm++;
 		ac_pm = npm - idle;
 		
-		// number of active pms	
+		// active pms	
 		sum_ac_pm += ac_pm;
 		if (ac_pm > max_ac_pm)
 			max_ac_pm = ac_pm;
@@ -332,17 +302,14 @@ void BF(struct machine pm[],struct machine vm[],int npm,int nvm)
 ////////////////////////////// Best Fit Decreasing //////////////////////////////
 void BFD(struct machine pm[],struct machine vm[],int npm,int nvm)
 {
-	int max_unaloc_vm=0, min_unaloc_vm=10000, sum_unaloc_vm=0; // number of unallocated vms
-	int max_ac_pm=0, min_ac_pm=10000, sum_ac_pm=0;  //number of active pms
-	float max_cu=0.0, min_cu=1.0, tot_cu=0.0;  //total cpu utilization
-	float max_ru=0.0, min_ru=1.0, tot_ru=0.0;  //total ram utilization
+	int max_ac_pm=0, min_ac_pm=10000, sum_ac_pm=0;  //total active pms
 	float max_rw=0.0, min_rw=1000.0, tot_rw=0.0;  //total rw
 	float max_pc=0.0, min_pc=1000000.0, tot_pc=0.0;  //total pc
 	float tmp_time=0;
 	
 	for (r=1; r<=nrun; r++) {
 		int i, j, idle=0, unaloc_vm=0, ac_pm=0;
-		float sum_cu=0, sum_ru=0, rw=0, pc=0, ave, var=0;
+		float sum_cu=0, sum_ru=0, rw=0, pc=0;
 		struct machine pm_org[npm], pm_copy[npm], vm_copy[nvm];
 		machines(npm, nvm);
 		for (i=0; i<npm; i++) 
@@ -384,18 +351,11 @@ void BFD(struct machine pm[],struct machine vm[],int npm,int nvm)
 		}
 		for (i=0; i<npm; i++)
 			if (pm_org[i].cu>0) {
-				sum_cu += pm_org[i].cu;
-				sum_ru += pm_org[i].ru;
 				pc += (pm_org[i].p_min+(pm_org[i].p_max-pm_org[i].p_min)*pm_org[i].cu);
-				ave = (pm_org[i].cu + pm_org[i].ru)/2;
-				var += 0.5*((pm_org[i].cu - ave,2)+pow(pm_org[i].ru - ave,2));
 			}
-		for (i=0; i<nvm; i++) 
-			if (vm_copy[i].c != 0)
-				unaloc_vm++;
 		ac_pm = npm - idle;
 		
-		// number of active pms	
+		// active pms	
 		sum_ac_pm += ac_pm;
 		if (ac_pm > max_ac_pm)
 			max_ac_pm = ac_pm;
@@ -426,17 +386,14 @@ void BFD(struct machine pm[],struct machine vm[],int npm,int nvm)
 void GRVMP(struct machine pm[],struct machine vm[],int npm,int nvm)
 {
 	int N=4;  // The number of Choices
-	int max_unaloc_vm=0, min_unaloc_vm=10000, sum_unaloc_vm=0; // number of unallocated vms
-	int max_ac_pm=0, min_ac_pm=10000, sum_ac_pm=0;  //number of active pms
-	float max_cu=0.0, min_cu=1.0, tot_cu=0.0;  //total cpu utilization
-	float max_ru=0.0, min_ru=1.0, tot_ru=0.0;  //total ram utilization
+	int max_ac_pm=0, min_ac_pm=10000, sum_ac_pm=0;  //total active pms
 	float max_rw=0.0, min_rw=1000.0, tot_rw=0.0;  //total rw
 	float max_pc=0.0, min_pc=1000000.0, tot_pc=0.0;  //total pc
 	float tmp_time=0;
 	
 	for (r=1; r<=nrun; r++) {
 		int i, j, idle=0, unaloc_vm=0, nvm1=nvm, x, flag, ac_pm=0;
-		float sum_cu=0, sum_ru=0, rw=0, pc=0, ave, var=0, y;
+		float sum_cu=0, sum_ru=0, rw=0, pc=0, y;
 		struct machine pm_org[npm], pm_copy[npm], vm_copy[nvm], vm1[nvm];
 		machines(npm, nvm);
 		
@@ -539,18 +496,11 @@ void GRVMP(struct machine pm[],struct machine vm[],int npm,int nvm)
 		
 		for (i=0; i<npm; i++)
 			if (pm_org[i].cu>0) {
-				sum_cu += pm_org[i].cu;
-				sum_ru += pm_org[i].ru;
 				pc += (pm_org[i].p_min+(pm_org[i].p_max-pm_org[i].p_min)*pm_org[i].cu);
-				ave = (pm_org[i].cu+pm_org[i].ru)/2;
-				var += 0.5*((pm_org[i].cu - ave,2)+pow(pm_org[i].ru - ave,2));
 			}
-		for (i=0; i<nvm; i++) 
-			if (vm1[i].c != 0)
-				unaloc_vm++;
 		ac_pm = npm - idle;
 		
-		// number of active pms	
+		// active pms	
 		sum_ac_pm += ac_pm;
 		if (ac_pm > max_ac_pm)
 			max_ac_pm = ac_pm;
@@ -580,27 +530,20 @@ void GRVMP(struct machine pm[],struct machine vm[],int npm,int nvm)
 //////////////////////////////  CRBFF  //////////////////////////////
 void CRBFF(struct machine pm[],struct machine vm[],int npm,int nvm)
 {
-	int N=0;
-	float tmp=(float)nvm/(float)npm;
-//	printf("\n%.3f\n", tmp);
-	if(ceil(tmp)<2)
-		N=2;
-	else
-//		N=ceil(tmp)+round(nvm/npm);
-		N=ceil(tmp);
-//		N*=round(nvm/npm);
-	
-	int max_unaloc_vm=0, min_unaloc_vm=10000, sum_unaloc_vm=0; // number of unallocated vms
-	int max_ac_pm=0, min_ac_pm=10000, sum_ac_pm=0;  //number of active pms
-	float max_cu=0.0, min_cu=1.0, tot_cu=0.0;  //total cpu utilization
-	float max_ru=0.0, min_ru=1.0, tot_ru=0.0;  //total ram utilization
+	int max_ac_pm=0, min_ac_pm=10000, sum_ac_pm=0;  //total active pms
 	float max_rw=0.0, min_rw=1000.0, tot_rw=0.0;  //total rw
 	float max_pc=0.0, min_pc=1000000.0, tot_pc=0.0;  //total pc
 	float tmp_time=0;
+	int N=0;
+	float tmp=(float)nvm/(float)npm;
+	if(ceil(tmp)<2)
+		N=2;
+	else
+		N=ceil(tmp);
 	
 	for (r=1; r<=nrun; r++) {
 		int i, j, idle=0, unaloc_vm=0, nvm1=nvm, x, flag, ac_pm=0;
-		float sum_cu=0, sum_ru=0, rw=0, pc=0, ave, var=0, y;
+		float sum_cu=0, sum_ru=0, rw=0, pc=0, y;
 		struct machine pm_org[npm], pm_copy[npm], vm_copy[nvm], vm1[nvm];
 		machines(npm, nvm);
 
@@ -703,18 +646,11 @@ void CRBFF(struct machine pm[],struct machine vm[],int npm,int nvm)
 		
 		for (i=0; i<npm; i++)
 			if (pm_org[i].cu>0) {
-				sum_cu += pm_org[i].cu;
-				sum_ru += pm_org[i].ru;
 				pc += (pm_org[i].p_min+(pm_org[i].p_max-pm_org[i].p_min)*pm_org[i].cu);
-				ave = (pm_org[i].cu+pm_org[i].ru)/2;
-				var += 0.5*((pm_org[i].cu - ave,2)+pow(pm_org[i].ru - ave,2));
 			}
-		for (i=0; i<nvm; i++) 
-			if (vm1[i].c != 0)
-				unaloc_vm++;
 		ac_pm = npm - idle;
 		
-		// number of active pms	
+		// active pms	
 		sum_ac_pm += ac_pm;
 		if (ac_pm > max_ac_pm)
 			max_ac_pm = ac_pm;
