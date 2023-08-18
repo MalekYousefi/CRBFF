@@ -711,7 +711,7 @@ void pm_decreasing_order_powerEfficiency(struct machine pm[], int npm)
 void machines(int npm, int nvm) {
 	
 	for (i=0; i<npm; i++) {
-//================= GCP =================
+//================= GCE =================
 //		pm[i].c = rand()%6001 + 2000;
 //		pm[i].r = rand()%24577 + 8192;
 //		pm[i].p_max = rand()%501 + 100;
@@ -734,7 +734,7 @@ void machines(int npm, int nvm) {
 //============================================
 
 	for (i=0; i<nvm; i++) {	
-//=============== GCP ===============
+//=============== GCE ===============
 //		x = rand()%4;
 //		if (x==0) {
 //			vm[i].c = 250;
